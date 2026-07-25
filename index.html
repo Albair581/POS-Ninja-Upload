@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POS Ninja Scanner Typing Utility 掃瞄器打字工具</title>
+  <meta name="description" content="Generate QR codes for a 2D barcode scanner to type text or import inventory items into POS Ninja. 生成二維條碼掃描器的 QR 碼，將文字或庫存項目導入 POS Ninja。">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="POSN Type Util">
+
+  <link rel="stylesheet" href="style.css">
+  <!-- qrcodejs renders the QR into #qrcode as a <canvas> (or <img> as a
+       fallback) entirely client-side; nothing is ever sent to a server. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+  <main class="page">
+    <header class="page-header">
+      <h1>POS Ninja Scanner Typing Utility 掃瞄器打字工具</h1>
+      <p>Generate a QR code, scan it with a 2D barcode scanner, and it types straight into POS Ninja — no on-screen keyboard needed. 生成二維條碼掃描器的 QR 碼，將文字或庫存項目導入 POS Ninja。</p>
+    </header>
+
+    <div class="mode-switch" role="tablist">
+      <button id="mode-text-btn" class="mode-btn active" role="tab" type="button">Plain Text 純文字</button>
+      <button id="mode-item-btn" class="mode-btn" role="tab" type="button">Import Inventory Item 庫存項目創建</button>
+    </div>
+
+    <section id="panel-text" class="panel">
+      <label for="text-input">Text to type 文字</label>
+      <textarea id="text-input" maxlength="500" rows="4"
+        placeholder="Whatever you type here gets typed out exactly by the scanner, followed by Enter. 您在此輸入的文字將被掃描器精確地輸入，然後按 Enter。"></textarea>
+      <button id="generate-text-btn" class="primary-btn" type="button">Generate QR Code 生成 QR 碼</button>
+    </section>
+
+    <section id="panel-item" class="panel hidden">
+      <div class="field">
+        <label for="item-name">Name 名稱 *</label>
+        <input id="item-name" type="text" maxlength="100" required>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="item-qty">Quantity 數量 *</label>
+          <input id="item-qty" type="number" min="0" step="1" value="1" required>
+        </div>
+        <div class="field">
+          <label for="item-price">Unit Price 單價 *</label>
+          <input id="item-price" type="number" min="0" step="0.01" required>
+        </div>
+        <div class="field">
+          <label for="item-cost">Unit Cost 成本 *</label>
+          <input id="item-cost" type="number" min="0" step="0.01">
+        </div>
+      </div>
+      <div class="field">
+        <label for="item-notes">Notes 備註</label>
+        <textarea id="item-notes" maxlength="500" rows="2"></textarea>
+      </div>
+      <button id="generate-item-btn" class="primary-btn" type="button">Generate QR Code 生成 QR 碼</button>
+    </section>
+
+    <p id="form-error" class="error-text" role="alert"></p>
+
+    <section id="output-section" class="output hidden">
+      <div id="qrcode" class="qr-box"></div>
+      <div class="payload-box">
+        <span class="payload-label">Encoded payload 加密</span>
+        <code id="payload-preview"></code>
+      </div>
+      <div class="output-actions">
+        <button id="copy-btn" class="secondary-btn" type="button">Copy payload 複製</button>
+        <button id="download-btn" class="secondary-btn" type="button">Download PNG 下載圖片（PNG檔）</button>
+      </div>
+    </section>
+
+    <footer class="page-footer">
+      <p>Item-import codes are prefixed and re-validated inside the app before anything is created, so scanning a random QR code from elsewhere can't affect your inventory. 庫存品項的 QR 碼在應用程式內被前綴和重新驗證，因此從其他地方掃描隨機 QR 碼不會影響您的庫存。</p>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
