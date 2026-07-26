@@ -48,7 +48,7 @@
           <input id="item-price" type="number" min="0" step="0.01" required>
         </div>
         <div class="field">
-          <label for="item-cost">Unit Cost 成本 *</label>
+          <label for="item-cost">Unit Cost 成本</label>
           <input id="item-cost" type="number" min="0" step="0.01">
         </div>
       </div>
@@ -64,7 +64,7 @@
     <section id="output-section" class="output hidden">
       <div id="qrcode" class="qr-box"></div>
       <div class="payload-box">
-        <span class="payload-label">Encoded payload 加密</span>
+        <span class="payload-label">Encoded payload 加密內容</span>
         <code id="payload-preview"></code>
       </div>
       <div class="output-actions">
@@ -74,7 +74,7 @@
     </section>
 
     <footer class="page-footer">
-      <p>Item-import codes are prefixed and re-validated inside the app before anything is created, so scanning a random QR code from elsewhere can't affect your inventory. 庫存品項的 QR 碼在應用程式內被前綴和重新驗證，因此從其他地方掃描隨機 QR 碼不會影響您的庫存。</p>
+      <p>Item-import codes are prefixed and re-validated inside the app before anything is created, so scanning a random QR code from elsewhere can't affect your inventory. 庫存品項的 QR 碼在應用程式內會先經過前綴辨識與重新驗證才會建立資料，因此掃描來路不明的 QR 碼不會影響您的庫存。</p>
     </footer>
   </main>
 
