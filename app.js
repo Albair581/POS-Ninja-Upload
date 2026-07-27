@@ -59,7 +59,7 @@ function initQrCode() {
     text: " ",
     width: 280,
     height: 280,
-    correctLevel: QRCode.CorrectLevel.M,
+    correctLevel: QRCode.CorrectLevel.L,
   });
 }
 
@@ -109,7 +109,7 @@ function clearOutput() {
 
 function renderQr(payload) {
   qrCode.clear();
-  qrCode.makeCode(payload);
+  qrCode.makeCode(encodeURIComponent(payload));
   $("payload-preview").textContent = payload;
   $("output-section").classList.remove("hidden");
   $("form-error").textContent = "";
