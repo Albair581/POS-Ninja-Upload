@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>POS Ninja Scanner Typing Utility 掃瞄器打字工具</title>
-  <meta name="description" content="Generate QR codes for a 2D barcode scanner to type text or import inventory items into POS Ninja. 生成二維條碼掃描器的 QR 碼，將文字或庫存項目導入 POS Ninja。">
+  <meta name="description" content="Generate QR codes for a 2D barcode scanner to type text or import inventory items into POS Ninja, or sync files with a paired device. 生成二維條碼掃描器的 QR 碼，將文字或庫存項目導入 POS Ninja，或與已配對的裝置同步檔案。">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="POSN Type Util">
@@ -13,17 +13,22 @@
   <!-- qrcodejs renders the QR into #qrcode as a <canvas> (or <img> as a
        fallback) entirely client-side; nothing is ever sent to a server. -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- SheetJS — used only to build the blank .xlsx import template
+       client-side (Device Sync tab), so it's available even before this
+       browser has ever paired with a device. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
   <main class="page">
     <header class="page-header">
       <h1>POS Ninja Scanner Typing Utility 掃瞄器打字工具</h1>
-      <p>Generate a QR code, scan it with a 2D barcode scanner, and it types straight into POS Ninja — no on-screen keyboard needed. 生成二維條碼掃描器的 QR 碼，將文字或庫存項目導入 POS Ninja。</p>
+      <p>Generate a QR code, scan it with a 2D barcode scanner, and it types straight into POS Ninja — no on-screen keyboard needed. Or sync files with a paired device below. 生成二維條碼掃描器的 QR 碼，將文字或庫存項目導入 POS Ninja，或於下方與已配對的裝置同步檔案。</p>
     </header>
 
     <div class="mode-switch" role="tablist">
       <button id="mode-text-btn" class="mode-btn active" role="tab" type="button">Plain Text 純文字</button>
       <button id="mode-item-btn" class="mode-btn" role="tab" type="button">Import Inventory Item 庫存項目創建</button>
+      <button id="mode-sync-btn" class="mode-btn" role="tab" type="button">Device Sync 裝置同步</button>
     </div>
 
     <section id="panel-text" class="panel">
@@ -73,11 +78,86 @@
       </div>
     </section>
 
+    <!-- ===================== Device Sync panel ===================== -->
+    <section id="panel-sync" class="panel hidden">
+      <div class="sync-template-box">
+        <p class="sync-hint">
+          Need a blank spreadsheet to fill in offline? No pairing required for this. 需要離線填寫的空白試算表？此項目不需要配對。
+        </p>
+        <button id="sync-template-btn" class="secondary-btn" type="button">
+          Download Blank Import Template 下載空白匯入範本
+        </button>
+      </div>
+
+      <!-- Shown until this browser has paired with a device. -->
+      <div id="sync-connect-view">
+        <div class="sync-divider"></div>
+        <p class="sync-hint">
+          In POS Ninja, go to <strong>Settings → Device Sync → Generate Pairing Code</strong>, then enter the code below. You'll only need to do this once — this website will remember the device afterward.
+          在 POS Ninja 中前往<strong>「設定 → 裝置同步 → 產生配對代碼」</strong>，然後在下方輸入代碼。您只需要操作一次——之後本網站會記住此裝置。
+        </p>
+        <div class="field-row sync-code-row">
+          <div class="field">
+            <label for="sync-code-input">Pairing Code 配對代碼</label>
+            <input id="sync-code-input" type="text" maxlength="9" placeholder="XKPQ-7RTN" autocapitalize="characters" autocomplete="off">
+          </div>
+          <button id="sync-connect-btn" class="primary-btn sync-connect-action" type="button">Connect 連接</button>
+        </div>
+        <p id="sync-connect-error" class="error-text" role="alert"></p>
+      </div>
+
+      <!-- Shown once paired — token lives in localStorage from here on. -->
+      <div id="sync-dashboard-view" class="hidden">
+        <div class="sync-divider"></div>
+        <div class="sync-dashboard-header">
+          <span class="sync-connected-badge">Connected 已連接</span>
+          <div class="sync-header-actions">
+            <button id="sync-refresh-btn" class="secondary-btn sync-small-btn" type="button">Refresh 重新整理</button>
+            <button id="sync-disconnect-btn" class="secondary-btn sync-small-btn sync-danger-btn" type="button">Disconnect 取消連結</button>
+          </div>
+        </div>
+        <p id="sync-dashboard-error" class="error-text" role="alert"></p>
+
+        <h2 class="sync-section-title">Download from POS Ninja 從 POS Ninja 下載</h2>
+        <div class="sync-file-grid">
+          <div class="sync-file-card">
+            <h3>Inventory 庫存</h3>
+            <div id="sync-kind-inventory"></div>
+          </div>
+          <div class="sync-file-card">
+            <h3>Products 產品</h3>
+            <div id="sync-kind-products"></div>
+          </div>
+          <div class="sync-file-card">
+            <h3>Analytics 數據分析</h3>
+            <div id="sync-kind-analytics"></div>
+          </div>
+        </div>
+        <p class="sync-hint">
+          Files appear here after you tap <strong>Sync Now</strong> in the app's Settings, and are removed automatically after about 20 minutes.
+          在應用程式的設定中點選<strong>「立即同步」</strong>後，檔案會顯示於此，並會在約 20 分鐘後自動移除。
+        </p>
+
+        <h2 class="sync-section-title">Upload to POS Ninja 上傳至 POS Ninja</h2>
+        <p class="sync-hint">
+          Send an .xlsx file here, then use <strong>Import from Website</strong> inside the app's Excel import dialog to bring it in.
+          在此傳送 .xlsx 檔案，然後於應用程式的 Excel 匯入視窗中使用<strong>「從網站匯入」</strong>將其匯入。
+        </p>
+        <div class="field-row sync-upload-row">
+          <input id="sync-upload-input" type="file" accept=".xlsx">
+          <button id="sync-upload-btn" class="primary-btn" type="button">Upload to POS Ninja 上傳至 POS Ninja</button>
+        </div>
+        <p id="sync-upload-status" class="sync-upload-status"></p>
+      </div>
+    </section>
+    <!-- =================== End Device Sync panel =================== -->
+
     <footer class="page-footer">
-      <p>Item-import codes are prefixed and re-validated inside the app before anything is created, so scanning a random QR code from elsewhere can't affect your inventory. 庫存品項的 QR 碼在應用程式內會先經過前綴辨識與重新驗證才會建立資料，因此掃描來路不明的 QR 碼不會影響您的庫存。</p>
+      <p>Item-import codes are prefixed and re-validated inside the app before anything is created, so scanning a random QR code from elsewhere can't affect your inventory. Sync files are transferred over HTTPS, kept only briefly, and only ever accessible to a browser holding the exact pairing token. 庫存品項的 QR 碼在應用程式內會先經過前綴辨識與重新驗證才會建立資料，因此掃描來路不明的 QR 碼不會影響您的庫存。同步檔案透過 HTTPS 傳輸，僅短暫保留，且僅持有正確配對權杖的瀏覽器才能存取。</p>
     </footer>
   </main>
 
   <script src="app.js"></script>
+  <script src="sync.js"></script>
 </body>
 </html>

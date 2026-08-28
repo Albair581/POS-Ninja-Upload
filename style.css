@@ -8,6 +8,8 @@
   --primary-dark: #a8613f;
   --error-bg: #fbe7e4;
   --error-text: #9c3b2c;
+  --success-bg: #e8f3ea;
+  --success-text: #2f6b3c;
   --radius: 12px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
     "Noto Sans TC", "Microsoft JhengHei", Roboto, Helvetica, Arial, sans-serif;
@@ -142,6 +144,11 @@ textarea { resize: vertical; }
 
 .primary-btn:hover { background: var(--primary-dark); }
 
+.primary-btn:disabled, .secondary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .secondary-btn {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -239,6 +246,153 @@ textarea { resize: vertical; }
 
 .hidden { display: none !important; }
 
+/* --- Device Sync panel --- */
+
+.sync-hint {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.sync-template-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sync-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0 2px;
+}
+
+.sync-code-row {
+  align-items: flex-end;
+}
+
+.sync-connect-action {
+  width: auto;
+  flex: 0 0 auto;
+  align-self: stretch;
+}
+
+#sync-code-input {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.sync-dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.sync-connected-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--success-bg);
+  color: var(--success-text);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+.sync-connected-badge::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success-text);
+}
+
+.sync-header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.sync-small-btn {
+  width: auto;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+}
+
+.sync-danger-btn {
+  color: var(--error-text);
+  border-color: var(--error-text);
+}
+
+.sync-section-title {
+  font-size: 1rem;
+  margin: 8px 0 0;
+}
+
+.sync-file-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.sync-file-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sync-file-card h3 {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.sync-file-empty {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.sync-file-meta {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+.sync-download-btn {
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+}
+
+.sync-upload-row {
+  align-items: center;
+}
+
+.sync-upload-row input[type="file"] {
+  flex: 1 1 200px;
+  padding: 8px;
+}
+
+.sync-upload-status {
+  color: var(--error-text);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.sync-upload-status.sync-upload-success {
+  color: var(--success-text);
+}
+
 /* --- Responsive tweaks --- */
 
 @media (max-width: 480px) {
@@ -265,6 +419,10 @@ textarea { resize: vertical; }
 
   .mode-btn {
     flex: 1 1 100%;
+  }
+
+  .sync-connect-action {
+    width: 100%;
   }
 }
 

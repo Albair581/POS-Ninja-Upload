@@ -12,7 +12,7 @@
  * POS Ninja，完全不需要螢幕鍵盤。這類掃描器會模擬實體鍵盤：掃描 QR 碼會
  * 將其內容逐字輸入，並在最後送出一個 Enter 鍵。
  *
- * Two modes 兩種模式：
+ * Three modes 三種模式：
  *   1. Plain Text 純文字 — the QR simply encodes whatever was typed here.
  *      QR 碼會直接編碼您所輸入的文字內容。
  *   2. Item Import 庫存項目創建 — the QR encodes a compact, prefixed JSON
@@ -20,6 +20,11 @@
  *      brand-new inventory item automatically.
  *      QR 碼會編碼一段附有前綴、精簡的 JSON 內容，POS Ninja 應用程式會
  *      辨識並自動建立一筆新的庫存項目。
+ *   3. Device Sync 裝置同步 — pair with a POS Ninja install and
+ *      download/upload files through the sync server. See sync.js for
+ *      all of this mode's logic; this file only wires the tab switch.
+ *      與 POS Ninja 裝置配對，並透過同步伺服器上傳／下載檔案。此模式的
+ *      邏輯皆位於 sync.js，本檔案僅負責頁籤切換。
  *
  * Item Import payload format 庫存項目創建的內容格式 (kept intentionally
  * tiny — it has to fit comfortably, and scan reliably, in a QR code):
@@ -47,6 +52,8 @@ const ITEM_IMPORT_PREFIX = "POSN1I:";
 const MAX_TEXT_LEN = 500;
 const MAX_NAME_LEN = 100;
 const MAX_NOTES_LEN = 500;
+
+const MODES = ["text", "item", "sync"];
 
 let qrCode = null;
 
@@ -92,12 +99,17 @@ function sanitizeField(str, maxLen) {
   return neutralizeFormulaPrefix(s);
 }
 
+/**
+ * Switches between the three top-level tabs. "sync" has no QR
+ * output/error elements of its own (see panel-sync in index.html), so
+ * clearOutput() runs unconditionally on every switch — it's harmless
+ * when those elements are simply already empty/hidden.
+ */
 function setMode(mode) {
-  const isText = mode === "text";
-  $("mode-text-btn").classList.toggle("active", isText);
-  $("mode-item-btn").classList.toggle("active", !isText);
-  $("panel-text").classList.toggle("hidden", !isText);
-  $("panel-item").classList.toggle("hidden", isText);
+  MODES.forEach((m) => {
+    $(`mode-${m}-btn`).classList.toggle("active", m === mode);
+    $(`panel-${m}`).classList.toggle("hidden", m !== mode);
+  });
   clearOutput();
 }
 
@@ -205,6 +217,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   $("mode-text-btn").addEventListener("click", () => setMode("text"));
   $("mode-item-btn").addEventListener("click", () => setMode("item"));
+  $("mode-sync-btn").addEventListener("click", () => setMode("sync"));
   $("generate-text-btn").addEventListener("click", generateTextQr);
   $("generate-item-btn").addEventListener("click", generateItemQr);
   $("copy-btn").addEventListener("click", copyPayload);
