@@ -304,12 +304,12 @@ async function handleDisconnect() {
 
 function downloadImportTemplate() {
   const headers = [
-    "ID (編號)",
-    "Name (名稱)",
-    "Quantity (數量)",
-    "Unit Price (單價)",
-    "Unit Cost (單位成本)",
-    "Notes (備註)",
+    "ID",
+    "Name",
+    "Quantity",
+    "Unit Price",
+    "Unit Cost",
+    "Notes",
   ];
   const worksheet = XLSX.utils.aoa_to_sheet([headers]);
   const workbook = XLSX.utils.book_new();
