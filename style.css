@@ -414,6 +414,11 @@ textarea { resize: vertical; }
   color: var(--success-text);
 }
 
+input[type="radio"] {
+  width: auto;
+  padding: 0;
+}
+
 /* --- Responsive tweaks --- */
 
 @media (max-width: 480px) {
@@ -451,7 +456,7 @@ textarea { resize: vertical; }
    stretching too wide to use easily. */
 @media (min-width: 900px) {
   .page {
-    max-width: 640px;
+    max-width: 900px;
     padding-top: 56px;
   }
 }
