@@ -84,6 +84,16 @@
         <p class="sync-hint">
           Need a blank spreadsheet to fill in offline? No pairing required for this. 需要離線填寫的空白試算表？此項目不需要配對。
         </p>
+        <div class="sync-template-lang" role="radiogroup" aria-label="Template language">
+          <label>
+            <input type="radio" name="template-lang" value="en" checked>
+            English
+          </label>
+          <label>
+            <input type="radio" name="template-lang" value="zh">
+            繁體中文
+          </label>
+        </div>
         <button id="sync-template-btn" class="secondary-btn" type="button">
           Download Blank Import Template 下載空白匯入範本
         </button>
@@ -134,8 +144,8 @@
           </div>
         </div>
         <p class="sync-hint">
-          Files appear here after you tap <strong>Sync Now</strong> in the app's Settings, and are removed automatically after about 20 minutes.
-          在應用程式的設定中點選<strong>「立即同步」</strong>後，檔案會顯示於此，並會在約 20 分鐘後自動移除。
+          Files appear here after you tap <strong>Sync Now</strong> in the app's Settings, and are removed automatically after about 20 minutes. Column headers in these files already match whatever language POS Ninja itself is set to — no separate language option needed here.
+          在應用程式的設定中點選<strong>「立即同步」</strong>後，檔案會顯示於此，並會在約 20 分鐘後自動移除。這些檔案的欄位標題會自動與 POS Ninja 應用程式當下的語言一致，此處不需另外選擇語言。
         </p>
 
         <h2 class="sync-section-title">Upload to POS Ninja 上傳至 POS Ninja</h2>

@@ -91,9 +91,13 @@ async function apiUnlink(token) {
 
 /**
  * Not fetched with JS — used as a plain <a href> so the browser follows
- * the server's 302 straight to the presigned S3 URL and downloads the
- * file (the server sets Content-Disposition: attachment), without this
- * page ever needing CORS access to S3 itself.
+ * the server's 302 straight to the presigned storage URL and downloads
+ * the file (the server sets Content-Disposition: attachment), without
+ * this page ever needing CORS access to that storage provider itself.
+ * This is a full page navigation, not a fetch()/XHR call, so browser
+ * CORS restrictions on cross-origin redirects never come into play here
+ * — unlike the app's own pending-file download, which does go through
+ * fetch() and is proxied server-side for exactly that reason.
  */
 function downloadHref(token, kind) {
   return `${SYNC_API_BASE}/api/pos/sync/files/download?token=${encodeURIComponent(token)}&kind=${encodeURIComponent(kind)}`;
@@ -299,27 +303,48 @@ async function handleDisconnect() {
 /* --- Blank import template (no pairing required) ----------------------------*/
 //
 // Mirrors ExcelImportService.buildTemplate() on the app side exactly —
-// same header text, same column order — so a template downloaded here
-// and one downloaded from inside the app are interchangeable.
+// same header text, same column order, and (as of this version) the
+// same rule: headers are always a single language at a time, drawn
+// verbatim from the app's recognized alias list. An earlier version of
+// this template used combined bilingual headers like "ID (編號)", which
+// looked helpful but didn't exactly match any alias the app's parser
+// checks against — so a template downloaded, filled in, and re-imported
+// unmodified would silently fail to match any column. Pick one language
+// and both sides agree on it.
+
+const TEMPLATE_HEADERS = {
+  en: ["ID", "Name", "Quantity", "Unit Price", "Unit Cost", "Notes"],
+  zh: ["編號", "名稱", "數量", "單價", "單位成本", "備註"],
+};
+
+function getTemplateLang() {
+  const checked = document.querySelector('input[name="template-lang"]:checked');
+  return checked ? checked.value : "en";
+}
 
 function downloadImportTemplate() {
-  const headers = [
-    "ID",
-    "Name",
-    "Quantity",
-    "Unit Price",
-    "Unit Cost",
-    "Notes",
-  ];
+  const lang = getTemplateLang();
+  const headers = TEMPLATE_HEADERS[lang] || TEMPLATE_HEADERS.en;
   const worksheet = XLSX.utils.aoa_to_sheet([headers]);
   const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Template");
-  XLSX.writeFile(workbook, "inventory_import_template.xlsx");
+  XLSX.utils.book_append_sheet(workbook, worksheet, lang === "zh" ? "範本" : "Template");
+  XLSX.writeFile(workbook, lang === "zh" ? "庫存匯入範本.xlsx" : "inventory_import_template.xlsx");
+}
+
+/** Defaults the language radio to match the visitor's browser language,
+ * so most people never have to touch it — still fully overridable. */
+function initTemplateLangDefault() {
+  const prefersChinese = (navigator.language || "").toLowerCase().startsWith("zh");
+  const target = document.querySelector(
+    `input[name="template-lang"][value="${prefersChinese ? "zh" : "en"}"]`,
+  );
+  if (target) target.checked = true;
 }
 
 /* --- Wiring -------------------------------------------------------------- */
 
 window.addEventListener("DOMContentLoaded", () => {
+  initTemplateLangDefault();
   $("sync-template-btn").addEventListener("click", downloadImportTemplate);
 
   $("sync-connect-btn").addEventListener("click", handleConnect);
